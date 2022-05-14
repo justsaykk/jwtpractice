@@ -4,7 +4,8 @@ const app = express();
 const jwt = require("jsonwebtoken");
 const PORT = 3000;
 const users = require("./users");
-// const bodyParser = require("body-parser");
+const transactions = require("./transactions");
+// const bodyParser = require("body-parser"); // Remember to freaking post JSON and not "text"
 
 app.use(express.json());
 
@@ -36,7 +37,13 @@ app.post("/posts", (req, res) => {
   const authToken = req.headers.token;
   //validate token
   const decoded = jwt.verify(authToken, process.env.TOKEN_SECRET);
-  res.json({ username: decoded.data });
+  if (!decoded) {
+    res.status(403).end;
+  } else {
+    const username = decoded.data;
+    const userTransactions = transactions[username];
+    res.status(200).json({ transactions: userTransactions });
+  }
 });
 
 app.listen(PORT, () => {
