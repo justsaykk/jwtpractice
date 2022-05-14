@@ -3,7 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
-const PORT = 3000;
+const PORT = process.env.PORT;
 const users = require("./users");
 const transactions = require("./transactions");
 // const bodyParser = require("body-parser"); // Remember to freaking post JSON and not "text"
