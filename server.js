@@ -1,3 +1,4 @@
+//DEPENDENCIES
 require("dotenv").config();
 const express = require("express");
 const app = express();
@@ -7,8 +8,25 @@ const users = require("./users");
 const transactions = require("./transactions");
 // const bodyParser = require("body-parser"); // Remember to freaking post JSON and not "text"
 
+// MIDDLEWARE
 app.use(express.json());
 
+const verifyToken = (req, res, next) => {
+  try {
+    // Retrieve token from body
+    const authToken = req.headers.token;
+    // Validate token
+    const decoded = jwt.verify(authToken, process.env.TOKEN_SECRET);
+    const username = decoded.data;
+    // Set username and move the function along
+    req.user = username;
+    next();
+  } catch (error) {
+    res.sendStatus(403);
+  }
+};
+
+//ROUTES
 app.get("/", (req, res) => {
   res.send("Hello World!");
 });
@@ -32,18 +50,10 @@ app.post("/login", (req, res) => {
   }
 });
 
-app.post("/posts", (req, res) => {
-  // Retrieve token from body
-  const authToken = req.headers.token;
-  //validate token
-  const decoded = jwt.verify(authToken, process.env.TOKEN_SECRET);
-  if (!decoded) {
-    res.status(403).end;
-  } else {
-    const username = decoded.data;
-    const userTransactions = transactions[username];
-    res.status(200).json({ transactions: userTransactions });
-  }
+app.post("/posts", verifyToken, (req, res) => {
+  const username = req.user;
+  const userTransactions = transactions[username];
+  res.status(200).json({ transactions: userTransactions });
 });
 
 app.listen(PORT, () => {
