@@ -56,6 +56,10 @@ app.post("/posts", verifyToken, (req, res) => {
   res.status(200).json({ transactions: userTransactions });
 });
 
+app.post("/logout", (req, res) => {
+  res.clearCookie("NewCookie").send("cleared cookie");
+});
+
 app.listen(PORT, () => {
   console.log("Listening on port", PORT);
 });
